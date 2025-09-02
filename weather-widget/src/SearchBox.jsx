@@ -3,9 +3,11 @@ import Button from "@mui/material/Button";
 import "./SearchBox.css";
 import { useState } from "react";
 
-export default function SearchBox() {
+export default function SearchBox({ updateInfo }) {
   //creating state Variable
   let [city, setCity] = useState("");
+  //to hold error message
+  let [error, setError] = useState(false);
 
   //Api url - weather api - geocoding
   const API_URL = "https://api.openweathermap.org/data/2.5/weather";
@@ -15,35 +17,46 @@ export default function SearchBox() {
 
   //to get the weather info
   let getWeatherInfo = async () => {
-    let response = await fetch(`${API_URL}?q=${ city }&appid=${ API_KEY }&units=metric`);
+    let response = await fetch(
+      `${API_URL}?q=${city}&appid=${API_KEY}&units=metric`
+    );
     let jsonResponse = await response.json();
+    // Safely extract values
     let result = {
-        temp: jsonResponse.main.temp,
-        tempMin: jsonResponse.main.temp_min,
-        tempMax: jsonResponse.main.temp_max,
-        humidity: jsonResponse.main.humidity,
-        feelsLike: jsonResponse.main.feelsLike,
-        weather: jsonResponse.weather[0].description,
+      city: city,
+      temp: jsonResponse.main.temp,
+      tempMin: jsonResponse.main.temp_min,
+      tempMax: jsonResponse.main.temp_max,
+      humidity: jsonResponse.main.humidity,
+      feelsLike: jsonResponse.main.feels_like,
+      weather: jsonResponse.weather[0].description,
     };
+
     console.log(result);
+    return result;
   };
 
   //handling change event for input field
   let handleChange = (evt) => {
     setCity(evt.target.value);
   };
+
   //when we are submitting a form, the default behavior of the browser is to reload the page
   //to prevent this, we use evt.preventDefault()
-  let handleSubmit = (evt) => {
-    evt.preventDefault();
-    console.log(city);
-    setCity("");
-    getWeatherInfo();
+  let handleSubmit = async (evt) => {
+    try {
+      evt.preventDefault();
+      console.log(city);
+      setCity("");
+      let newinfo = await getWeatherInfo();
+      updateInfo(newinfo);
+    } catch {
+      setError(true);
+    }
   };
 
   return (
-    <div className = "SearchBox">
-      <h3>Search for the weather</h3>
+    <div className="SearchBox">
       <form onSubmit={handleSubmit}>
         <TextField
           id="city"
@@ -56,11 +69,11 @@ export default function SearchBox() {
 
         <br />
         <br />
-        <br />
 
         <Button variant="contained" type="submit">
           Search
         </Button>
+        {error && <p style={{color: "red"}}>No such place exist!</p>}
       </form>
     </div>
   );
