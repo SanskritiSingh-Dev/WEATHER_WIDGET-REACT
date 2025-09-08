@@ -20,7 +20,7 @@ function WeatherApp() {
     // rendering the components
     return(
         <div style={{textAlign: "center"}}>
-        <h2>Weather app by Sanskriti</h2>
+        <h2>WEATHER ON FINGURE TIPS</h2>
         <SearchBox updateInfo = {updateInfo} />
         <InfoBox  info={weatherInfo}/> 
         </div>
